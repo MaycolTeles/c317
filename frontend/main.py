@@ -1,15 +1,18 @@
 import flet as ft
 
-from pages import RegisterPage
+from navigation.router import Router
+from pages import HomePage
+from styles import colors
 
 
 def main(page: ft.Page):
     page.title = "C317 - Frontend"
-    page.spacing = 0
+    page.padding = 0
+    page.bgcolor = colors.background
 
-    app = RegisterPage()
-
-    page.add(app)
+    router = Router(page)
+    page.on_route_change = router.on_route_change
+    page.add(router.body)
 
 
 ft.app(target=main)
