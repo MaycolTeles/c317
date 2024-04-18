@@ -1,7 +1,7 @@
 
-from .home_page import HomePage
+from .register_page import RegisterPage
 
 
 __all__ = [
-    "HomePage",
+    "RegisterPage",
 ]
