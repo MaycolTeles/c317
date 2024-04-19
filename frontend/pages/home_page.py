@@ -5,9 +5,25 @@ from navigation import Routes
 from styles import colors
 
 
-class HomePage():
+class HomePage:
     def __init__(self, page: ft.Page):
         self._page = page
+
+        self._page.appbar = ft.AppBar(
+            bgcolor=colors.primary_color,
+            actions=[
+                ft.IconButton(
+                    ft.icons.SETTINGS,
+                    on_click=self._handle_open_settings,
+                )
+            ]
+        )
+        self._page.floating_action_button = ft.FloatingActionButton(
+            icon=ft.icons.SUPPORT_AGENT,
+            on_click=self._handle_start_chatbot,
+            bgcolor=colors.primary_color,
+        )
+        self._page.update()
 
     def get_content(self):
         return ft.Container(
@@ -30,50 +46,20 @@ class HomePage():
                     height=250,
                     alignment=ft.alignment.center,
                 ),
+                Gap(100),
                 ft.Text(
-                    "Seja bem vindo! Faça login para continuar.",
+                    "APLICAÇÃO IWS",
                     color=colors.primary_color,
                     weight=ft.FontWeight.BOLD,
                     size=16,
                 ),
-                Gap(200),
-                ft.Container(
-                    padding=20,
-                    content=self._get_buttons(),
-                )
+                Gap(100),
             ]
         )
 
-    def _get_buttons(self):
-        button_style = ft.ButtonStyle(
-            shape=ft.RoundedRectangleBorder(radius=10),
-            color=colors.white,
-            bgcolor=colors.primary_color,
-        )
+    def _handle_start_chatbot(self, event: ft.ControlEvent):
+        self._page.go(Routes.CHATBOT_PAGE.value)
 
-        return ft.Row(
-            alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-            controls=[
-                ft.ElevatedButton(
-                    content=ft.Text("CADASTRAR", weight=ft.FontWeight.BOLD),
-                    width=150,
-                    height=50,
-                    style=button_style,
-                    on_click=self._handle_register
-                ),
-                Gap(10),
-                ft.ElevatedButton(
-                    content=ft.Text("FAZER LOGIN", weight=ft.FontWeight.BOLD),
-                    width=150,
-                    height=50,
-                    style=button_style,
-                    on_click=self._handle_login
-                ),
-            ],
-        )
-
-    def _handle_register(self, event: ft.ControlEvent):
-        self._page.go(Routes.REGISTER_PAGE.value)
-
-    def _handle_login(self, event: ft.ControlEvent):
-        self._page.go(Routes.LOGIN_PAGE.value)
+    def _handle_open_settings(self, event: ft.ControlEvent):
+        print("OPEN SETTINGS")
+        # self._page.go(Routes.SETTINGS_PAGE.value)

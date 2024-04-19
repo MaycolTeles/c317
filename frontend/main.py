@@ -1,12 +1,11 @@
 import flet as ft
 
 from navigation.router import Router
-from pages import HomePage
 from styles import colors
 
 
 def main(page: ft.Page):
-    page.title = "C317 - Frontend"
+    page.title = "Aplicativo IWS"
     page.padding = 0
     page.bgcolor = colors.background
 

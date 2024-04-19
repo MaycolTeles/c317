@@ -5,7 +5,7 @@ from navigation import Routes
 from styles import colors
 
 
-class RegisterPage():
+class RegisterPage:
     def __init__(self, page: ft.Page):
         self._page = page
 
@@ -131,6 +131,7 @@ class RegisterPage():
 
     def _handle_register(self, event: ft.ControlEvent):
         print("TODO: IMPLEMENTAR REGISTAR USUÁRIO")
+        self._page.go(Routes.HOME_PAGE.value)
 
     def _handle_already_registered(self, event: ft.ControlEvent):
         self._page.go(Routes.LOGIN_PAGE.value)

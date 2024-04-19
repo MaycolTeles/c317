@@ -5,7 +5,7 @@ from navigation import Routes
 from styles import colors
 
 
-class LoginPage():
+class LoginPage:
     def __init__(self, page: ft.Page):
         self._page = page
 
@@ -124,4 +124,5 @@ class LoginPage():
         self._page.go(Routes.REGISTER_PAGE.value)
 
     def _handle_login(self, event: ft.ControlEvent):
-        print("TODO: IMPLEMENTAR LOGIN")
+        print("TODO: IMPLEMENTAR VALIDACAO LOGIN")
+        self._page.go(Routes.HOME_PAGE.value)
