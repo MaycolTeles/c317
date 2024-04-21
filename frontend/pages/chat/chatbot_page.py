@@ -1,12 +1,22 @@
-import flet as ft
+import json
+import threading
 
+import flet as ft
+from websockets.sync.client import connect
+
+from api import UserMessageAPI, SessionAPI, WEBSOCKET_URL
 from components import SystemMessage, UserMessage, InputTextField
 from navigation.routes import Routes
 from styles import colors
 
 
 class ChatBotPage:
+    _session_id: str
+
     def __init__(self, page: ft.Page):
+
+        self._create_new_chat_section()
+
         self._page = page
 
         self._page.appbar = ft.AppBar(
@@ -28,6 +38,13 @@ class ChatBotPage:
             bgcolor=colors.background_grey,
             content=self._get_content(),
         )
+
+    def _create_new_chat_section(self):
+        session_id = SessionAPI.create()
+        self._session_id = session_id
+
+        uri = f"{WEBSOCKET_URL}/{session_id}/"
+        self._websocket = connect(uri)
 
     def _get_content(self):
         self._input_field = InputTextField(
@@ -80,16 +97,21 @@ class ChatBotPage:
         self._page.go(Routes.HOME_PAGE.value)
 
     def _handle_send_message(self, event: ft.ControlEvent):
-        input = self._input_field.value
-        if not input:
+        msg = self._input_field.value
+        if not msg:
             return
+
+        send_message_thread = threading.Thread(target=self._send_message_to_backend, args=(msg,))
+        send_message_thread.start()
 
         self._input_field.value = ""
         self._input_field.update()
 
-        message = UserMessage(input).get_content()
+        message = UserMessage(msg).get_content()
 
         self._chat_history.controls.append(message)
         self._chat_history.update()
 
-        # TODO: SEND MESSAGE TO BACKEND
+    def _send_message_to_backend(self, msg: str):
+        self._websocket.send(json.dumps({'message': msg}))
+        UserMessageAPI.create(msg, self._session_id)
