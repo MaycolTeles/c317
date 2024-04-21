@@ -22,4 +22,5 @@ class SessionViewSet(viewsets.ModelViewSet):
 
     queryset = Session.objects.all()
     serializer_class = SessionSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]

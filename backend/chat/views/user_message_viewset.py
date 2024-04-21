@@ -22,4 +22,5 @@ class UserMessageViewSet(viewsets.ModelViewSet):
 
     queryset = UserMessage.objects.all()
     serializer_class = UserMessageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
+    # permission_classes = [permissions.IsAuthenticated]

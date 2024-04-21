@@ -17,3 +17,12 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'email', 'is_staff')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     exclude = ('password',)
+    readonly_fields = ('id', 'created_at', 'updated_at')
+    fields = (
+        'id',
+        'created_at',
+        'updated_at',
+        "last_login",
+        "email",
+        "name",
+    )

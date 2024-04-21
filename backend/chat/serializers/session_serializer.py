@@ -11,7 +11,7 @@ class SessionSerializer(DefaultSerializer):
     """
 
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    helpful_score = serializers.IntegerField()
+    helpful_score = serializers.IntegerField(required=False)
 
     class Meta:
         model = Session

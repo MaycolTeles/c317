@@ -22,13 +22,17 @@ from account.views import (
     AuthViewSet,
     UserViewSet
 )
-from chat.views import index, room
+from chat.views import (
+    UserMessageViewSet,
+    SessionViewSet
+)
 
 
 router = routers.DefaultRouter()
 
 router.register(r'users', UserViewSet)
-# router.register(r'messages', MessagesViewSet)
+router.register(r'sessions', SessionViewSet)
+router.register(r'user-messages', UserMessageViewSet)
 
 auth_router = routers.DefaultRouter()
 auth_router.register(r'', AuthViewSet, basename='auth')
@@ -39,6 +43,4 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include(auth_router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('chat/', index),
-    path('chat/<str:room_name>/', room),
 ]
