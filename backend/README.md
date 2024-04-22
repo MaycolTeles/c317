@@ -3,7 +3,7 @@
 Rodar FE:
 
 ```bash
-poetry run flet run -d -r --web --port 8000 main.py
+poetry run flet run -d -r --web --port 8080 main.py
 ```
 
 Rodar BE:
