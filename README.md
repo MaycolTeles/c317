@@ -1,9 +1,16 @@
 # c317
 
+Rodar aplicação:
+
+```bash
+docker-compose up
+```
+
+
 Rodar FE:
 
 ```bash
-poetry run flet run -d -r --web --port 8000 main.py
+poetry run flet run -d -r --web --port 3000 main.py
 ```
 
 Rodar BE:

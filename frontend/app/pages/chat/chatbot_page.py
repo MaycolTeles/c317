@@ -1,4 +1,5 @@
 import json
+import time
 import threading
 
 import flet as ft
@@ -15,6 +16,8 @@ class ChatBotPage:
 
     def __init__(self, page: ft.Page):
 
+        self._create_new_chat_section()
+
         self._page = page
 
         self._page.appbar = ft.AppBar(
@@ -28,8 +31,6 @@ class ChatBotPage:
             toolbar_height=80,
         )
         self._page.update()
-
-        self._create_new_chat_section()
 
     def get_content(self):
         return ft.Container(
@@ -113,5 +114,33 @@ class ChatBotPage:
         self._chat_history.controls.append(message)
         self._chat_history.update()
 
+        receive_message_thread = threading.Thread(target=self._await_message_from_backend)
+        receive_message_thread.start()
+
     def _send_message_to_backend(self, msg: str):
         self._websocket.send(json.dumps({'message': msg}))
+
+    def _await_message_from_backend(self):
+        # First, we need to display a typing component
+        # to simulate that a user is typing.
+        # Then, we need to wait for the response from the backend
+        # Finally, we need to display the response
+        typing_indicator_thread = threading.Thread(target=self._show_typing_indicator)
+        typing_indicator_thread.start()
+
+        receive_message_thread = threading.Thread(target=self._receive_message_from_backend)
+        receive_message_thread.start()
+
+    def _show_typing_indicator(self):
+        time.sleep(1)
+        waiting_message = SystemMessage("...").get_content()
+        self._chat_history.controls.append(waiting_message)
+        self._chat_history.update()
+
+    def _receive_message_from_backend(self):
+        response = json.loads(self._websocket.recv())
+        message = SystemMessage(response['message']).get_content()
+
+        self._chat_history.controls.pop()
+        self._chat_history.controls.append(message)
+        self._chat_history.update()

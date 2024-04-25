@@ -118,3 +118,30 @@ class AuthViewSet(viewsets.ViewSet):
         response = {'message': 'User logged out successfully'}
         return Response(response)
 
+    @action(detail=False, methods=["post"], url_path="reset-password", url_name="reset-password")
+    def reset_password(self, request: Request, *args, **kwargs) -> Response:
+        """
+        API Endpoint to reset a user password by:
+            1. Validating the user email;
+            2. Resetting the user password;
+        """
+        body: dict[str, str] = request.data
+
+        try:
+            email = body["email"]
+            password = body["password"]
+
+        except KeyError:
+            response = {"error": "Missing required fields."}
+            return Response(response, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        
+        user = User.objects.filter(email=email).first()
+        if user is None:
+            response = {'error': 'Invalid email'}
+            return Response(response, status=status.HTTP_401_UNAUTHORIZED)
+
+        user.set_password(password)
+        user.save(update_fields=["password"])
+
+        response = {'message': 'Password successfully reset.'}
+        return Response(response, status=status.HTTP_200_OK)

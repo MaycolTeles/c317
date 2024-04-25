@@ -7,12 +7,14 @@ import pages
 
 class Router:
     routes_map = {
+        Routes.INDEX_PAGE.value: pages.WelcomePage,
         Routes.WELCOME_PAGE.value: pages.WelcomePage,
         Routes.HOME_PAGE.value: pages.HomePage,
         Routes.LOGIN_PAGE.value: pages.LoginPage,
         Routes.REGISTER_PAGE.value: pages.RegisterPage,
         Routes.CHATBOT_PAGE.value: pages.ChatBotPage,
         Routes.SUPPORT_PAGE.value: pages.SupportPage,
+        Routes.PASSWORD_RECOVERY_PAGE.value: pages.PasswordRecoveryPage,
     }
 
     def __init__(self, page: ft.Page) -> None:

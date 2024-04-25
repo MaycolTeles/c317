@@ -15,3 +15,5 @@ class UserMessageAdmin(admin.ModelAdmin):
 
     list_display = ('session', 'user')
     list_filter = ('session', 'user')
+    readonly_fields = ('id', 'created_at', 'updated_at')
+    fields = ('id', 'created_at', 'updated_at', 'session', 'user', 'content')

@@ -122,7 +122,7 @@ class LoginPage:
         )
 
     def _handle_forgot_password(self, event: ft.ControlEvent):
-        print("TODO: IMPLEMENTAR RECUPERAÇÃO DE SENHA")
+        self._page.go(Routes.PASSWORD_RECOVERY_PAGE.value)
 
     def _handle_register(self, event: ft.ControlEvent):
         self._page.go(Routes.REGISTER_PAGE.value)

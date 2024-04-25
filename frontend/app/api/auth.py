@@ -42,3 +42,13 @@ class AuthAPI:
         os.environ["token"] = token
 
         return token
+
+    @staticmethod
+    def update_password(email: str, password: str) -> None:
+        body = {
+            "email": email,
+            "password": password,
+        }
+        url = f"{AuthAPI.URL}/reset-password/"
+        response = requests.post(url, data=body)
+        response.raise_for_status()

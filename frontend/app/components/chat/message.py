@@ -11,9 +11,15 @@ class ChatMessageCard:
     def get_content(self):
         return ft.Card(
             ft.Container(
-                ft.Text(self._message),
+                ft.Text(
+                    self._message,
+                    max_lines=60,
+                    overflow=ft.TextOverflow.ELLIPSIS,
+                ),
                 padding=20,
             ),
             color=colors.secondary_color,
             margin=ft.Margin(left=5, right=5, top=10, bottom=10),
+            expand=True,
+            expand_loose=True,
         )

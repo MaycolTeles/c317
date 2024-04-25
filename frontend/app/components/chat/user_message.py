@@ -10,14 +10,17 @@ class UserMessage:
         self._message = message
 
     def get_content(self):
-        return ft.Row(
-            alignment=ft.MainAxisAlignment.END,
-            controls=[
-                ChatMessageCard(self._message).get_content(),
-                ft.Icon(
-                    ft.icons.PERSON,
-                    color=colors.primary_color,
-                    size=30,
-                ),
-            ]
+        return ft.Container(
+                padding=ft.Padding(right=0, left=100, top=0, bottom=0),
+                content=ft.Row(
+                alignment=ft.MainAxisAlignment.END,
+                controls=[
+                    ChatMessageCard(self._message).get_content(),
+                    ft.Icon(
+                        ft.icons.PERSON,
+                        color=colors.primary_color,
+                        size=30,
+                    ),
+                ]
+            )
         )

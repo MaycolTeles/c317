@@ -4,12 +4,14 @@ from uuid import UUID
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
-from chat.models import Session, UserMessage
+from chat.models import Session, UserMessage, ChatBotMessage
+from chat.chatbot import ChatBot
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
     _session_id: str
     _room_group_name: str
+    _chatbot = ChatBot()
 
     async def connect(self):
         session_id: UUID = self.scope["url_route"]["kwargs"]["session_id"]
@@ -34,30 +36,57 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = text_data_json["message"]
 
         # Save message to database
-        await database_sync_to_async(self.create_user_message)(message)
+        await database_sync_to_async(self._create_user_message)(message)
 
-        # Send message to room group
-        msg = {"type": "chat_message", "message": message}
-        await self.channel_layer.group_send(self._room_group_name, msg)
+        # Send message to ChatBot Assistant
+        response = self._chatbot.send_message(message)
 
-    async def chat_message(self, event):
-        """
-        Method to receive a message from the room group
-        and send it to the WebSocket.
-        """
-        message = event["message"]
+        # -------------------------- DEBUG --------------------------
+        # response = "Tá funcionando!"
+
+        # import time
+        # time.sleep(2)
+        # -------------------------- DEBUG --------------------------
 
         # Send message to WebSocket
-        await self.send(text_data=json.dumps({"message": message}))
+        await self.send(text_data=json.dumps({"message": response}))
 
-    def create_user_message(self, message: str):
+        # Save message to database
+        await database_sync_to_async(self._create_chatbot_message)(response)
+
+        # # Send message to room group
+        # msg = {"type": "chat_message", "message": message}
+        # await self.channel_layer.group_send(self._room_group_name, msg)
+
+    # async def chat_message(self, event):
+    #     """
+    #     Method to receive a message from the room group
+    #     and send it to the WebSocket.
+    #     """
+    #     message = event["message"]
+
+    #     # Send message to WebSocket
+    #     await self.send(text_data=json.dumps({"message": message}))
+
+    def _create_user_message(self, message: str):
         """
         Method to create a user message.
         """
         session = Session.objects.get(id=self._session_id)
 
         UserMessage.objects.create(
-            session_id=self._session_id,
+            session_id=session.id,
             user=session.user,
+            content=message,
+        )
+
+    def _create_chatbot_message(self, message: str):
+        """
+        Method to create a chatbot message.
+        """
+        session = Session.objects.get(id=self._session_id)
+
+        ChatBotMessage.objects.create(
+            session_id=session.id,
             content=message,
         )

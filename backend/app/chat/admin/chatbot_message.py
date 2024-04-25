@@ -15,5 +15,5 @@ class ChatBotMessageAdmin(admin.ModelAdmin):
 
     list_display = ('session', 'created_at', 'helpful_score')
     list_filter = ('session', 'helpful_score')
-    fields = ('id', 'created_at', 'updated_at', 'session', 'helpful_score')
-
+    readonly_fields = ('id', 'created_at', 'updated_at')
+    fields = ('id', 'created_at', 'updated_at', 'session', 'helpful_score', 'content')
