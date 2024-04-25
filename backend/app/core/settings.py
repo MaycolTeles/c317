@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+from .constants import DB_HOST, DB_USER, DB_PASSWORD, DB_PORT, DB_NAME
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -100,9 +103,13 @@ DATABASES = {
     #     "PORT": "5432",
     # }
     'default': {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+       "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "HOST": DB_HOST,
+        "USER": DB_USER,
+        "PASSWORD": DB_PASSWORD,
+        "PORT": DB_PORT,
+        "NAME": DB_NAME,
+    },
 }
 
 
