@@ -3,9 +3,14 @@
 Rodar aplicação:
 
 ```bash
-docker-compose up
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
+Parar aplicação:
+
+```bash
+docker-compose -f docker-compose.prod.yml down -v
+```
 
 Rodar FE:
 

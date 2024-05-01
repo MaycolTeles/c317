@@ -44,8 +44,9 @@ class ChatBotPage:
         session_id = SessionAPI.create()
         self._session_id = session_id
 
-        uri = f"{WEBSOCKET_URL}/{session_id}/"
+        uri = f"{WEBSOCKET_URL}/ws/chat/{session_id}/"
         headers = API.get_headers()
+        headers['origin'] = WEBSOCKET_URL
         self._websocket = connect(uri, additional_headers=headers)
 
     def _get_content(self):

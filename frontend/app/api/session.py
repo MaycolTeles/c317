@@ -1,6 +1,6 @@
 
 from .api import API    
-from .contants import API_URL
+from .constants import API_URL
 
 
 class SessionAPI:

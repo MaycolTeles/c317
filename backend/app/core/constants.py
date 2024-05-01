@@ -19,3 +19,7 @@ DB_PASSWORD = os.getenv("DB_PASSWORD", "postgres")
 DB_PORT = os.getenv("DB_PORT", "5432")
 
 DB_NAME = os.getenv("DB_NAME", "postgres")
+
+DJANGO_SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-key")
+
+DJANGO_ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(" ")

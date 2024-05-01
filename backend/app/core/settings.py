@@ -12,7 +12,15 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
-from .constants import DB_HOST, DB_USER, DB_PASSWORD, DB_PORT, DB_NAME
+from .constants import (
+    DB_HOST,
+    DB_USER,
+    DB_PASSWORD,
+    DB_PORT,
+    DB_NAME,
+    DJANGO_SECRET_KEY,
+    DJANGO_ALLOWED_HOSTS,
+)
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,17 +31,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-wl!qkm(eu3)02=$)j*pg%u#kt@gcc9o8#flnualr5l-@=etly_'
+SECRET_KEY = DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["*"]
+ORIGINS = [f"https://{host}" for host in DJANGO_ALLOWED_HOSTS]
+ORIGINS += [f"http://{host}" for host in DJANGO_ALLOWED_HOSTS]
 
+ALLOWED_HOSTS = DJANGO_ALLOWED_HOSTS
 
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:3000",
-]
+CORS_ALLOWED_ORIGINS = ORIGINS
+
+CSRF_TRUSTED_ORIGINS = ORIGINS
 
 
 # Application definition
@@ -43,7 +53,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
-    'daphne',
 
     # Django apps
     'django.contrib.admin',
@@ -94,14 +103,6 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     "ENGINE": "django.db.backends.postgresql_psycopg2",
-    #     "HOST": "db",
-    #     "USER": "postgres",
-    #     "PASSWORD": "postgres",
-    #     "NAME": "postgres",
-    #     "PORT": "5432",
-    # }
     'default': {
        "ENGINE": "django.db.backends.postgresql_psycopg2",
         "HOST": DB_HOST,
@@ -148,6 +149,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

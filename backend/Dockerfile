@@ -1,16 +1,21 @@
 # Use an official Python runtime as the base image
 FROM python:3.12-slim
 
-# Install dependencies
-RUN apt-get update \
-    && apt-get -y install libpq-dev gcc \
-    && pip install psycopg2
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
 # Set unbuffered output for python
+# 1. Prevents Python from writing pyc files to disc
+# 2. Prevents Python from buffering stdout and stderr
+ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Set the working directory in the container
-WORKDIR /app
+# # Install dependencies
+RUN apt update \
+    && apt install -y libpq-dev gcc \
+    && apt install -y netcat-traditional \
+    && pip install --upgrade pip \
+    && pip install psycopg2
 
 # Copy the requirements file into the container
 COPY requirements.txt .
@@ -18,11 +23,13 @@ COPY requirements.txt .
 # Install the dependencies
 RUN pip install -r requirements.txt
 
+# Copy the entrypoint.sh file into the container and make it executable
+COPY ./entrypoint.sh .
+RUN sed -i 's/\r$//g' /usr/src/app/entrypoint.sh
+RUN chmod +x /usr/src/app/entrypoint.sh
+
 # Copy the app directory into the container
 COPY /app .
 
-# Expose port
-EXPOSE 8000
-
-# Run migrations and start the server
-CMD python manage.py migrate && python manage.py runserver 0.0.0.0:8000
+# run entrypoint.sh
+ENTRYPOINT ["/usr/src/app/entrypoint.sh"]

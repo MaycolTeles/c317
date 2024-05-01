@@ -143,7 +143,7 @@ class RegisterPage:
         username: str = self._name_text_field.value  # type: ignore
         email: str = self._email_text_field.value  # type: ignore
         password: str = self._password_text_field.value  # type: ignore
-        
+
         try:
             AuthAPI.register_user(
                 username=username,

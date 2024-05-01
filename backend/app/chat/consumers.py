@@ -35,18 +35,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json["message"]
 
-        # Save message to database
-        await database_sync_to_async(self._create_user_message)(message)
-
         # Send message to ChatBot Assistant
         response = self._chatbot.send_message(message)
 
-        # -------------------------- DEBUG --------------------------
-        # response = "Tá funcionando!"
-
-        # import time
-        # time.sleep(2)
-        # -------------------------- DEBUG --------------------------
+        # Save message to database
+        await database_sync_to_async(self._create_user_message)(message)
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({"message": response}))

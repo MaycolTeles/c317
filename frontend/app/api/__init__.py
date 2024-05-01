@@ -1,6 +1,6 @@
 
 from .api import API
-from .contants import WEBSOCKET_URL
+from .constants import WEBSOCKET_URL
 from .session import SessionAPI
 
 

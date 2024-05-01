@@ -3,7 +3,7 @@ import os
 
 import requests
 
-from .contants import API_AUTH_URL
+from .constants import API_AUTH_URL
 
 
 class AuthAPI:

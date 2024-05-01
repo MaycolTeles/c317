@@ -1,0 +1,69 @@
+###########
+# BUILDER #
+# Docker multi-stage build to reduce the final image size
+###########
+
+# Use an official Python runtime as the base image
+FROM python:3.12 as builder
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Set unbuffered output for python
+# 1. Prevents Python from writing pyc files to disc
+# 2. Prevents Python from buffering stdout and stderr
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Copy the requirements file into the container
+COPY requirements.txt .
+
+# Install the dependencies
+RUN pip install --upgrade pip \
+    && pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
+
+
+#########
+# FINAL #
+#########
+
+# Use an official Python runtime as the base image
+FROM python:3.12
+
+# create directory for the app user
+RUN mkdir -p /home/app
+
+# create the app user
+RUN addgroup --system app && adduser --system --group app
+
+# create the appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+RUN mkdir $APP_HOME
+RUN mkdir $APP_HOME/staticfiles
+WORKDIR $APP_HOME
+
+# install dependencies
+COPY --from=builder /usr/src/app/wheels /wheels
+
+RUN apt update \
+    && apt install -y --no-install-recommends netcat-traditional \
+    && pip install --upgrade pip \
+    && pip install --no-cache /wheels/*
+
+# Copy the entrypoint.sh file into the container and make it executable
+COPY ./entrypoint.sh .
+RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.sh
+RUN chmod +x  $APP_HOME/entrypoint.sh
+
+# Copy the app directory into the container
+COPY /app $APP_HOME
+
+# chown all the files to the app user
+RUN chown -R app:app $APP_HOME
+
+# change to the app user
+USER app
+
+# run entrypoint.sh
+ENTRYPOINT ["/home/app/web/entrypoint.sh"]
