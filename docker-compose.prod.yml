@@ -39,8 +39,8 @@ services:
     build: ./frontend
     env_file: ./frontend/.env
     environment:
-      - API_URL=http://backend:8000
-      - WEBSOCKET_URL=ws://backend:8000
+      - API_URL=http://nginx
+      - WEBSOCKET_URL=ws://nginx
     ports:
       - 3000:3000
     depends_on:
@@ -51,9 +51,10 @@ services:
     volumes:
       - static_volume:/home/app/web/staticfiles
     ports:
-      - 1337:80
+      - 8080:80
     depends_on:
       - backend
+
 
 volumes:
   postgres_data:
