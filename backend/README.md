@@ -6,14 +6,5 @@ Rodar FE:
 poetry run flet run -d -r --web --port 3000 main.py
 ```
 
-Rodar BE:
-
-```bash
-./manage.py runserver
-```
-
-Rodar Redis:
-
-```bash
-docker run -p 6379:6379 -d redis:5
-```
+Envs:
+DJANGO_ALLOWED_HOSTS="localhost 127.0.0.1 backend nginx"
