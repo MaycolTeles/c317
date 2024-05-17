@@ -20,6 +20,7 @@ from .constants import (
     DB_NAME,
     DJANGO_SECRET_KEY,
     DJANGO_ALLOWED_HOSTS,
+    DJANGO_CSRF_TRUSTED_ORIGINS
 )
 
 
@@ -36,14 +37,16 @@ SECRET_KEY = DJANGO_SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ORIGINS = [f"https://{host}" for host in DJANGO_ALLOWED_HOSTS]
-ORIGINS += [f"http://{host}" for host in DJANGO_ALLOWED_HOSTS]
+
+# Hosts & Origins
+HTTPS_ORIGINS = [f"https://{host}" for host in DJANGO_ALLOWED_HOSTS]
+HTPP_ORIGINS = [f"http://{host}" for host in DJANGO_ALLOWED_HOSTS]
 
 ALLOWED_HOSTS = DJANGO_ALLOWED_HOSTS
 
-CORS_ALLOWED_ORIGINS = ORIGINS
+CORS_ALLOWED_ORIGINS = HTTPS_ORIGINS + HTPP_ORIGINS
 
-CSRF_TRUSTED_ORIGINS = ORIGINS
+CSRF_TRUSTED_ORIGINS = DJANGO_CSRF_TRUSTED_ORIGINS
 
 
 # Application definition

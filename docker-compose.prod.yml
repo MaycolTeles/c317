@@ -35,7 +35,7 @@ services:
     links:
       - db:db
 
-  frontend:
+  frontend-1:
     build: ./frontend
     env_file: ./frontend/.env
     environment:
@@ -45,6 +45,17 @@ services:
       - 3000:3000
     depends_on:
       - backend
+    
+  # frontend-2:
+  #   build: ./frontend
+  #   env_file: ./frontend/.env
+  #   environment:
+  #     - API_URL=http://nginx
+  #     - WEBSOCKET_URL=ws://nginx
+  #   ports:
+  #     - 3001:3000
+  #   depends_on:
+  #     - backend
 
   nginx:
     build: ./nginx

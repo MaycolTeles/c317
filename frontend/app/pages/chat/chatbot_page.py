@@ -129,8 +129,24 @@ class ChatBotPage:
         typing_indicator_thread = threading.Thread(target=self._show_typing_indicator)
         typing_indicator_thread.start()
 
-        receive_message_thread = threading.Thread(target=self._receive_message_from_backend)
+        event = threading.Event()
+        receive_message_thread = threading.Thread(target=self._receive_message_from_backend, args=(event,))
         receive_message_thread.start()
+
+        typing_indicator_thread.join()
+
+        # Define a timeout (5min) for the response
+        five_minutes = 5 * 60
+        receive_message_thread.join(five_minutes)
+
+        if receive_message_thread.is_alive():
+            self._chat_history.controls.pop()
+            message = SystemMessage("Desculpe, não conseguimos processar sua solicitação. Tente novamente mais tarde.").get_content()
+            self._chat_history.controls.append(message)
+            self._chat_history.update()
+
+        event.set()
+        receive_message_thread.join()
 
     def _show_typing_indicator(self):
         time.sleep(1)
@@ -138,7 +154,7 @@ class ChatBotPage:
         self._chat_history.controls.append(waiting_message)
         self._chat_history.update()
 
-    def _receive_message_from_backend(self):
+    def _receive_message_from_backend(self, event):
         response = json.loads(self._websocket.recv())
         message = SystemMessage(response['message']).get_content()
 

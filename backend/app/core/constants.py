@@ -23,3 +23,5 @@ DB_NAME = os.getenv("DB_NAME", "postgres")
 DJANGO_SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-key")
 
 DJANGO_ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost").split(" ")
+
+DJANGO_CSRF_TRUSTED_ORIGINS = os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(" ")

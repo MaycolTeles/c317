@@ -25,4 +25,4 @@ COPY /app .
 COPY pyproject.toml .
 
 # Set the command to run the App
-CMD poetry run flet run -d -r --web --port 3000 main.py
+CMD flet run --web --port 3000 main.py

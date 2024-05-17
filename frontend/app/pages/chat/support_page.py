@@ -1,45 +1,32 @@
-import flet as ft
+import json
+import time
+import threading
 
+import flet as ft
+from websockets.sync.client import connect
+
+from api import API, WEBSOCKET_URL
 from components import SystemMessage, UserMessage, InputTextField, Gap
 from navigation.routes import Routes
 from styles import colors
 
 
 class SupportPage:
+    _session_id: str
+
     def __init__(self, page: ft.Page):
         self._page = page
-
-        title = ft.Column(
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            controls=[
-                ft.Text(
-                    "Suporte Técnico IWS",
-                    style=ft.TextStyle(color=colors.white, size=22)
-                ),
-                Gap(1),
-                ft.Text(
-                    "Percebemos que sua dúvida ainda não foi sanada.",
-                    text_align=ft.TextAlign.CENTER,
-                    style=ft.TextStyle(color=colors.white, size=12)
-                ),
-                ft.Text(
-                    "Direcionamos você para nosso atendimento especializado.",
-                    text_align=ft.TextAlign.CENTER,
-                    style=ft.TextStyle(color=colors.white, size=12)
-                )
-            ]
-        )
+        self._connect_to_chat_section()
 
         self._page.appbar = ft.AppBar(
-            leading=ft.IconButton(
+            ft.IconButton(
                 ft.icons.ARROW_BACK,
                 on_click=self._handle_back_button,
             ),
-            leading_width=40,
-            title=title,
+            title=ft.Text("Suporte IWS", style=ft.TextStyle(color=colors.white, size=24)),
             bgcolor=colors.primary_color,
             center_title=True,
-            toolbar_height=150,
+            toolbar_height=80,
         )
         self._page.update()
 
@@ -51,9 +38,77 @@ class SupportPage:
             content=self._get_content(),
         )
 
+    def _connect_to_chat_section(self):
+        self._dlg_modal = ft.AlertDialog(
+            modal=True,
+            open=True,
+            title=ft.Text("Conectar ao chat"),
+            content=ft.Text("Digite o ID do chat que você deseja se conectar:"),
+            actions_alignment=ft.MainAxisAlignment.END,
+            actions=[
+                InputTextField("ID do chat"),
+                Gap(20),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.END,
+                    controls=[
+                        ft.TextButton("CANCELAR", on_click=self._close_dlg),
+                        Gap(20),
+                        ft.TextButton("ACESSAR CHAT", on_click=self._connect_to_chat_websocket),
+                    ],
+                ),
+            ],
+        )
+
+        self._page.dialog = self._dlg_modal
+        self._page.update()
+
+    def _connect_to_chat_websocket(self, event: ft.ControlEvent):
+        session_id = self._dlg_modal.actions[0].value
+        uri = f"{WEBSOCKET_URL}/ws/chat/{session_id}/"
+        headers = API.get_headers()
+        headers['origin'] = WEBSOCKET_URL
+
+        try:
+            self._websocket = connect(uri, additional_headers=headers)
+
+        except Exception as e:
+            print(f"Error: {e}")
+            self._dlg_modal = ft.AlertDialog(
+                modal=True,
+                open=True,
+                title=ft.Text("Impossível conectar ao chat"),
+                content=ft.Text("Não foi possível conectar ao chat. Por favor, tente se conectar novamente utilizando um ID válido de sessão:"),
+                actions_alignment=ft.MainAxisAlignment.END,
+                actions=[
+                    InputTextField("ID do chat"),
+                    Gap(20),
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.END,
+                        controls=[
+                            ft.TextButton("CANCELAR", on_click=self._close_dlg),
+                            Gap(20),
+                            ft.TextButton("ACESSAR CHAT", on_click=self._connect_to_chat_websocket),
+                        ],
+                    ),
+                ],
+            )
+
+            self._page.dialog = self._dlg_modal
+
+        else:
+            self._session_id = session_id
+            self._dlg_modal.open = False
+
+        self._page.update()
+
+    def _close_dlg(self, event: ft.ControlEvent):
+        self._dlg_modal.open = False
+        self._page.update()
+        self._page.go(Routes.HOME_PAGE.value)
+
     def _get_content(self):
         self._input_field = InputTextField(
-            hint_text="Digite qual a sua dúvida...",
+            hint_text="Digite a sua mensagem...",
             keyboard_type=ft.KeyboardType.TEXT,
             multiline=True,
             min_lines=1,
@@ -70,10 +125,11 @@ class SupportPage:
         )
 
         self._chat_history = ft.ListView(
-            height=530,
+            height=600,
             padding=20,
             controls=[
-                SystemMessage("Olá, como eu posso te ajudar hoje?").get_content(),
+                # TODO: GET PAST MESSAGES
+                # SystemMessage("Olá, como eu posso te ajudar hoje?").get_content(),
             ],
         )
 
@@ -92,25 +148,74 @@ class SupportPage:
 
     def _handle_on_focus(self, event: ft.ControlEvent):
         self._input_field.hint_text = ""
-        self._page.update()
+        self._input_field.update()
 
     def _handle_on_blur(self, event: ft.ControlEvent):
-        self._input_field.hint_text = "Digite qual a sua dúvida..."
-        self._page.update()
+        self._input_field.hint_text = "Digite a sua mensagem..."
+        self._input_field.update()
 
     def _handle_back_button(self, event: ft.ControlEvent):
         self._page.go(Routes.HOME_PAGE.value)
 
     def _handle_send_message(self, event: ft.ControlEvent):
-        input = self._input_field.value
-        if not input:
+        msg = self._input_field.value
+        if not msg:
             return
 
-        self._input_field.value = ""
+        send_message_thread = threading.Thread(target=self._send_message_to_backend, args=(msg,))
+        send_message_thread.start()
 
-        message = UserMessage(input).get_content()
+        self._input_field.value = ""
+        self._input_field.update()
+
+        message = UserMessage(msg).get_content()
 
         self._chat_history.controls.append(message)
-        self._page.update()
+        self._chat_history.update()
 
-        # TODO: SEND MESSAGE TO BACKEND
+        receive_message_thread = threading.Thread(target=self._await_message_from_backend)
+        receive_message_thread.start()
+
+    def _send_message_to_backend(self, msg: str):
+        self._websocket.send(json.dumps({'message': msg}))
+
+    def _await_message_from_backend(self):
+        # First, we need to display a typing component
+        # to simulate that a user is typing.
+        # Then, we need to wait for the response from the backend
+        # Finally, we need to display the response
+        typing_indicator_thread = threading.Thread(target=self._show_typing_indicator)
+        typing_indicator_thread.start()
+
+        event = threading.Event()
+        receive_message_thread = threading.Thread(target=self._receive_message_from_backend, args=(event,))
+        receive_message_thread.start()
+
+        typing_indicator_thread.join()
+
+        # Define a timeout (5min) for the response
+        five_minutes = 5 * 60
+        receive_message_thread.join(five_minutes)
+
+        if receive_message_thread.is_alive():
+            self._chat_history.controls.pop()
+            message = SystemMessage("Desculpe, não conseguimos processar sua solicitação. Tente novamente mais tarde.").get_content()
+            self._chat_history.controls.append(message)
+            self._chat_history.update()
+
+        event.set()
+        receive_message_thread.join()
+
+    def _show_typing_indicator(self):
+        time.sleep(1)
+        waiting_message = SystemMessage("...").get_content()
+        self._chat_history.controls.append(waiting_message)
+        self._chat_history.update()
+
+    def _receive_message_from_backend(self, event):
+        response = json.loads(self._websocket.recv())
+        message = SystemMessage(response['message']).get_content()
+
+        self._chat_history.controls.pop()
+        self._chat_history.controls.append(message)
+        self._chat_history.update()
